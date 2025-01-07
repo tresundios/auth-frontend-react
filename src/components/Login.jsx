@@ -2,10 +2,11 @@ import { useNavigate } from "react-router-dom"
 import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useAuth } from './AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
-
+    const  { login } = useAuth();
     const [ formData , setFormData] = useState({
         email: "",
         password: ""
@@ -24,18 +25,20 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/login", formData);
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, formData);
 
-            const token = response.data.authorization.token;
+            // const token = response.data.authorization.token;
 
-            localStorage.setItem("token", token);
+            // localStorage.setItem("token", token);
+
+            login(response.data.user);
 
             Swal.fire({
                 icon: "success",
                 title: "Login Successful",
                 text: "Welcome back!",
             }).then(()=>{
-                navigate("/dashboard");
+                navigate("/home");
             });
 
         } catch (error) {

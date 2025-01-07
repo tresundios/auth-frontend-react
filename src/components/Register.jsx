@@ -24,44 +24,106 @@ const Register = () => {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            } );
-
-            const responseData = await response.json();
-
-            if(response.ok) {
+            });
+    
+            console.log('Response Status:', response.status);
+            console.log('Response Data:', response.data);
+    
+            // No need for response.json() since axios already parses JSON
+    
+            if (response.status >= 200 && response.status < 300) {
+                // Clear any previous validation errors since the response was successful
                 setValidationErrors({});
+                
+                // Assuming the server sends back a message in the response data
                 Swal.fire({
                     icon: "success",
                     title: "Success",
-                    text: responseData.message,
-                }).then(()=> {
+                    text: response.data.message || "Registration successful!", // Use message if available, otherwise a generic success message
+                }).then(() => {
                     window.location.href = "/login";
-                })
+                });
             } else {
-                setValidationErrors(responseData);
-                if(responseData) {
-                    setValidationErrors(responseData);
-                }
-                else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: responseData || "Registration failed.",
-                    });
-                }
+                // Here, we assume that error data from the server includes validation errors or some message
+                setValidationErrors(response.data.errors || {});
+                
+                // Show a generic error if there's no specific message
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: response.data.message || "Registration failed. Please check the form.",
+                });
             }
-
-
+    
         } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "An error occurred during registration",
-            });
+            // This catch block will handle network errors or any axios errors where there's no response
+            if (error.response) {
+                // Server responded with an error status
+                setValidationErrors(error.response.data.errors || {});
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.response.data.message || "An error occurred during registration",
+                });
+            } else {
+                // Network error or other issues
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred during registration. Please try again later.",
+                });
+            }
         }
-    }
+    };
 
-    const imagePath = `${import.meta.env.PUBLIC_URL}/images/bg-image.webp`;
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         const response = await axios.post('http://127.0.0.1:8000/api/register', formdata, {
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         } );
+
+    //         console.log('Response Status:', response.status);
+    //         console.log('Response Data:', response.data);
+
+    //         //const responseData = await response.json();
+
+    //         if(response.status >= 200 && response.status < 300) {
+    //             setValidationErrors({});
+    //             Swal.fire({
+    //                 icon: "success",
+    //                 title: "Success",
+    //                 text: responseData.message,
+    //             }).then(()=> {
+    //                 window.location.href = "/login";
+    //             })
+    //         } else {
+    //             setValidationErrors(response.data);
+    //             if(response.data) {
+    //                 setValidationErrors(response.data);
+    //             }
+    //             else {
+    //                 Swal.fire({
+    //                     icon: "error",
+    //                     title: "Error",
+    //                     text: response.data || "Registration failed.",
+    //                 });
+    //             }
+    //         }
+
+
+    //     } catch (error) {
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Error",
+    //             text: "An error occurred during registration",
+    //         });
+    //     }
+    // }
+
+    const imagePath = `public/images/bg-image.webp`;
 
     return (
         <section className="vh-100 bg-image" style={{ backgroundImage: `url('${imagePath}')`  }}>
